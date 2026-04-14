@@ -1,0 +1,54 @@
+# ---------------------------------------------------------------------------
+# CPU-only image for local testing
+# Use Dockerfile (GPU) for GCP Compute Engine deployment
+# ---------------------------------------------------------------------------
+FROM python:3.11-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# ---------------------------------------------------------------------------
+# System dependencies
+# ---------------------------------------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        espeak-ng \
+        ffmpeg \
+        libsndfile1 \
+        libsndfile1-dev \
+        wget \
+        git \
+    && rm -rf /var/lib/apt/lists/*
+
+# ---------------------------------------------------------------------------
+# Python dependencies
+# ---------------------------------------------------------------------------
+WORKDIR /app
+
+COPY requirements.txt .
+
+# Install CPU-only torch first to avoid pulling the large CUDA build
+RUN pip install --no-cache-dir torch torchaudio --index-url https://download.pytorch.org/whl/cpu \
+    && pip install --no-cache-dir -r requirements.txt \
+    && python -m unidic download
+
+# ---------------------------------------------------------------------------
+# Application files
+# ---------------------------------------------------------------------------
+COPY xtt_tts_script.py .
+COPY stt_service.py .
+COPY main.py .
+
+# ---------------------------------------------------------------------------
+# Runtime configuration
+# ---------------------------------------------------------------------------
+ENV MODEL_DIR=/app/models/kinyarwanda_health_model
+ENV HF_HOME=/app/.cache/huggingface
+ENV HF_TOKEN=""
+
+RUN mkdir -p /app/models /app/.cache
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
+    CMD wget -qO- http://localhost:8000/health || exit 1
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
