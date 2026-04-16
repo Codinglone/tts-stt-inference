@@ -16,6 +16,6 @@ espnet_model_zoo
 soundfile
 
 # Utilities
-numpy
+numpy<2
 scipy
 pyyaml
