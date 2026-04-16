@@ -37,7 +37,6 @@ COPY tts_main.py .
 # ---------------------------------------------------------------------------
 ENV MODEL_DIR=/app/models/kinyarwanda_health_model
 ENV HF_HOME=/app/.cache/huggingface
-ENV HF_TOKEN=""
 
 RUN mkdir -p /app/models /app/.cache
 
