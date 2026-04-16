@@ -64,7 +64,13 @@ class STTService:
         print(f"[STT] Using device: {device}")
 
         print("[STT] Initialising Speech2Text …")
-        self._model = Speech2Text(**kwargs, device=device)
+        self._model = Speech2Text(
+            **kwargs,
+            device=device,
+            beam_size=1,
+            maxlenratio=-1,
+            nbest=1,
+        )
         print("[STT] Model ready.")
 
     # ------------------------------------------------------------------
