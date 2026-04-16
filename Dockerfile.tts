@@ -24,8 +24,7 @@ WORKDIR /app
 
 COPY requirements-tts.txt .
 
-RUN pip install --no-cache-dir -r requirements-tts.txt \
-    && python -m unidic download
+RUN pip install --no-cache-dir -r requirements-tts.txt
 
 # ---------------------------------------------------------------------------
 # Application files
