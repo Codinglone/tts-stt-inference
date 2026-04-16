@@ -1,0 +1,56 @@
+# ---------------------------------------------------------------------------
+# TTS-only GPU image for GCP Compute Engine (T4)
+# ---------------------------------------------------------------------------
+FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# ---------------------------------------------------------------------------
+# System dependencies
+# ---------------------------------------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        espeak-ng \
+        ffmpeg \
+        libsndfile1 \
+        libsndfile1-dev \
+        wget \
+        git \
+    && rm -rf /var/lib/apt/lists/*
+
+# ---------------------------------------------------------------------------
+# Python dependencies
+# ---------------------------------------------------------------------------
+WORKDIR /app
+
+COPY requirements-tts.txt .
+
+RUN pip install --no-cache-dir -r requirements-tts.txt \
+    && python -m unidic download
+
+# ---------------------------------------------------------------------------
+# Application files
+# ---------------------------------------------------------------------------
+COPY xtt_tts_script.py .
+COPY tts_main.py .
+
+# ---------------------------------------------------------------------------
+# Runtime configuration
+# ---------------------------------------------------------------------------
+ENV MODEL_DIR=/app/models/kinyarwanda_health_model
+ENV HF_HOME=/app/.cache/huggingface
+ENV HF_TOKEN=""
+
+RUN mkdir -p /app/models /app/.cache
+
+EXPOSE 8001
+
+# ---------------------------------------------------------------------------
+# Health check
+# ---------------------------------------------------------------------------
+HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=3 \
+    CMD wget -qO- http://localhost:8001/health || exit 1
+
+# ---------------------------------------------------------------------------
+# Entrypoint
+# ---------------------------------------------------------------------------
+CMD ["uvicorn", "tts_main:app", "--host", "0.0.0.0", "--port", "8001", "--workers", "1"]
