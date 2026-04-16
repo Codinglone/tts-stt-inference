@@ -68,7 +68,8 @@ class STTService:
             **kwargs,
             device=device,
             beam_size=1,
-            ctc_weight=1.0,
+            ctc_weight=0.3,
+            maxlenratio=0.1,
             nbest=1,
         )
         print("[STT] Model ready.")
