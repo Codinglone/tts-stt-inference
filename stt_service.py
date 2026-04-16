@@ -4,6 +4,7 @@ STT Service using ESPnet OWSM v4 small (370 M parameters).
 Model page: https://huggingface.co/espnet/owsm_v4_small_370M
 """
 
+import numpy as np
 import soundfile as sf
 
 
@@ -58,6 +59,9 @@ class STTService:
         import time
 
         speech, _rate = sf.read(audio_path)
+        # Convert stereo to mono if needed
+        if speech.ndim > 1:
+            speech = np.mean(speech, axis=1)
         print(f"[STT] Audio loaded: {len(speech)} samples, rate={_rate}")
 
         t0 = time.time()
