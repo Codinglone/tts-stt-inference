@@ -6,6 +6,7 @@ Model page: https://huggingface.co/espnet/owsm_v4_small_370M
 
 import numpy as np
 import soundfile as sf
+import torch.utils.checkpoint  # noqa: F401 — needed for newer PyTorch
 
 
 class STTService:
