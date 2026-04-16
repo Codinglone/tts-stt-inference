@@ -58,8 +58,13 @@ class STTService:
             kwargs["asr_model_file"] = kwargs.pop("s2t_model_file")
         kwargs.pop("s2t_train_config", None)
 
+        # Use GPU if available
+        import torch
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        print(f"[STT] Using device: {device}")
+
         print("[STT] Initialising Speech2Text …")
-        self._model = Speech2Text(**kwargs)
+        self._model = Speech2Text(**kwargs, device=device)
         print("[STT] Model ready.")
 
     # ------------------------------------------------------------------
