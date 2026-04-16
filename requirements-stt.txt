@@ -1,0 +1,21 @@
+# Web framework
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9
+pydantic>=2.0
+
+# Deep learning
+torch>=2.1.0
+torchaudio>=2.1.0
+
+# STT (ESPnet OWSM v4)
+espnet
+espnet_model_zoo
+
+# Audio I/O
+soundfile
+
+# Utilities
+numpy
+scipy
+pyyaml
