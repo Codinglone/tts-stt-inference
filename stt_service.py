@@ -72,6 +72,9 @@ class STTService:
 
         if results:
             text, *_ = results[0]
+            # Strip special tokens like <kin><asr><notimestamps>
+            import re
+            text = re.sub(r"<[^>]+>", "", text).strip()
             print(f"[STT] Result: {text!r}")
             return text
         return ""
