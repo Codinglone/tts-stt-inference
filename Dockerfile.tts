@@ -37,6 +37,7 @@ COPY tts_main.py .
 # ---------------------------------------------------------------------------
 ENV MODEL_DIR=/app/models/kinyarwanda_health_model
 ENV HF_HOME=/app/.cache/huggingface
+ENV COQUI_TOS_AGREED=1
 
 RUN mkdir -p /app/models /app/.cache
 
