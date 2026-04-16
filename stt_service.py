@@ -68,6 +68,7 @@ class STTService:
             **kwargs,
             device=device,
             beam_size=1,
+            ctc_weight=1.0,
             nbest=1,
         )
         print("[STT] Model ready.")
@@ -88,10 +89,19 @@ class STTService:
         -------
         Transcribed text string, or an empty string if nothing was recognised.
         """
+        import time
+
         speech, _rate = sf.read(audio_path)
+        print(f"[STT] Audio loaded: {len(speech)} samples, rate={_rate}")
+
+        t0 = time.time()
         results = self._model(speech)
+        elapsed = time.time() - t0
+        print(f"[STT] Inference took {elapsed:.1f}s")
+
         if results:
             text, *_ = results[0]
+            print(f"[STT] Result: {text!r}")
             return text
         return ""
 
