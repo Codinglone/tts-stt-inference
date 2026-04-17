@@ -1,5 +1,5 @@
 """
-FastAPI service exposing TTS (Text-to-Speech) endpoint only.
+FastAPI service exposing TTS (Text-to-Speech) endpoint for Kinyarwanda.
 
 Endpoints
 ---------
@@ -18,10 +18,6 @@ from pydantic import BaseModel
 
 from xtt_tts_script import TTSService
 
-# ---------------------------------------------------------------------------
-# Shared model instance (loaded once on startup)
-# ---------------------------------------------------------------------------
-
 _tts: TTSService | None = None
 
 
@@ -36,26 +32,14 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="TTS Service",
-    description="Text-to-Speech (XTTS v2 + Kinyarwanda) API.",
+    description="Text-to-Speech for Kinyarwanda (XTTS-based).",
     version="1.0.0",
     lifespan=lifespan,
 )
 
 
-# ---------------------------------------------------------------------------
-# Schemas
-# ---------------------------------------------------------------------------
-
-
 class TTSRequest(BaseModel):
     text: str
-    language: str = "en"
-    use_kinyarwanda: bool = False
-
-
-# ---------------------------------------------------------------------------
-# Routes
-# ---------------------------------------------------------------------------
 
 
 @app.get("/health", tags=["utility"])
@@ -70,7 +54,7 @@ def health() -> dict:
     "/tts",
     response_class=FileResponse,
     tags=["tts"],
-    summary="Text → Speech",
+    summary="Text → Speech (Kinyarwanda)",
     responses={200: {"content": {"audio/wav": {}}}},
 )
 def text_to_speech(request: TTSRequest) -> FileResponse:
@@ -79,12 +63,7 @@ def text_to_speech(request: TTSRequest) -> FileResponse:
 
     output_path = os.path.join(tempfile.gettempdir(), f"tts_{uuid.uuid4().hex}.wav")
     try:
-        _tts.synthesize(
-            text=request.text,
-            output_path=output_path,
-            language=request.language,
-            use_kinyarwanda=request.use_kinyarwanda,
-        )
+        _tts.synthesize(text=request.text, output_path=output_path)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 

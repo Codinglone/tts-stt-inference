@@ -1,8 +1,7 @@
 """
-TTS Service using Coqui XTTS v2 and a custom Kinyarwanda health model.
+TTS Service using a custom Kinyarwanda XTTS-based health model.
 
-Models:
-  - tts_models/multilingual/multi-dataset/xtts_v2  (multilingual, default)
+Model:
   - DigitalUmuganda/xtts_based_male_female_health_model  (Kinyarwanda)
 
 Environment variables:
@@ -28,7 +27,6 @@ class TTSService:
         )
 
         self._authenticate()
-        self._load_xtts_v2()
         self._load_kinyarwanda_model()
 
     # ------------------------------------------------------------------
@@ -43,15 +41,6 @@ class TTSService:
             print(
                 "[TTS] Warning: HF_TOKEN not set — private model download may fail."
             )
-
-    def _load_xtts_v2(self) -> None:
-        from TTS.api import TTS
-
-        print("[TTS] Loading XTTS v2 …")
-        self.xtts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(
-            self.device
-        )
-        print("[TTS] XTTS v2 ready.")
 
     def _load_kinyarwanda_model(self) -> None:
         if not os.path.isdir(self.model_dir):
@@ -79,56 +68,10 @@ class TTSService:
     # Public API
     # ------------------------------------------------------------------
 
-    def synthesize(
-        self,
-        text: str,
-        output_path: str = "output.wav",
-        language: str = "en",
-        use_kinyarwanda: bool = False,
-        speaker_wav: str | None = None,
-    ) -> str:
+    def synthesize(self, text: str, output_path: str = "output.wav") -> str:
         """
-        Generate speech and write it to *output_path*.
-
-        Parameters
-        ----------
-        text            : Input text to synthesise.
-        output_path     : Destination WAV file.
-        language        : BCP-47 language code for XTTS v2 (default "en").
-        use_kinyarwanda : Use the custom Kinyarwanda health model instead.
-        speaker_wav     : Optional path to a reference speaker WAV for voice
-                          cloning (XTTS v2 only; falls back to the model
-                          sample when omitted).
-
-        Returns
-        -------
-        output_path after successful synthesis.
+        Generate Kinyarwanda speech and write it to *output_path*.
         """
-        if use_kinyarwanda:
-            return self._synthesize_kinyarwanda(text, output_path)
-        return self._synthesize_xtts(text, output_path, language, speaker_wav)
-
-    # ------------------------------------------------------------------
-    # Internal synthesis methods
-    # ------------------------------------------------------------------
-
-    def _synthesize_xtts(
-        self,
-        text: str,
-        output_path: str,
-        language: str,
-        speaker_wav: str | None,
-    ) -> str:
-        ref = speaker_wav or self.speaker_wav
-        self.xtts.tts_to_file(
-            text=text,
-            file_path=output_path,
-            speaker_wav=ref,
-            language=language,
-        )
-        return output_path
-
-    def _synthesize_kinyarwanda(self, text: str, output_path: str) -> str:
         if self.speaker_wav is None:
             raise RuntimeError(
                 "No reference speaker WAV found in the Kinyarwanda model directory."
